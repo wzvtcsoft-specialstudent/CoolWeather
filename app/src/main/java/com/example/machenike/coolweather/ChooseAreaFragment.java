@@ -1,6 +1,7 @@
 package com.example.machenike.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -82,6 +83,11 @@ public class ChooseAreaFragment extends Fragment{
                         }else if(currentLevel==CITY_LEVEL){
                             selectCity =cityList.get(i);
                             queryCounty();
+                        }else if(currentLevel==COUNTY_LEVEL){
+                            Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                            intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
+                            startActivity(intent);
+                            getActivity().finish();
                         }
             }
         });
