@@ -2,11 +2,14 @@ package com.example.machenike.coolweather;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +76,7 @@ public class ChooseAreaFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         area_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
@@ -84,10 +88,20 @@ public class ChooseAreaFragment extends Fragment{
                             selectCity =cityList.get(i);
                             queryCounty();
                         }else if(currentLevel==COUNTY_LEVEL){
+
                             Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                            SharedPreferences.Editor editor=sharedPreferences.edit();
+                            editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
+                            editor.commit();
                             intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
                             startActivity(intent);
                             getActivity().finish();
+                            if(getActivity() instanceof WeatherActivity){
+                                WeatherActivity weatherActivity=(WeatherActivity)getActivity();
+                                weatherActivity.drawer_layout.closeDrawer(Gravity.START);
+                            }
+
                         }
             }
         });

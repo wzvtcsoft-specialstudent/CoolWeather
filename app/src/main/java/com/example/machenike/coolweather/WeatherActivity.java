@@ -6,14 +6,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.machenike.coolweather.gson.Forecast;
 import com.example.machenike.coolweather.gson.Weather;
 import com.example.machenike.coolweather.util.HttpUtils;
@@ -39,9 +42,10 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView car_tv;
     private TextView sport_tv;
     private ScrollView scroll_view;
-    private DrawerLayout drawer_layout;
+    public DrawerLayout drawer_layout;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+    private Button back;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,15 +55,27 @@ public class WeatherActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor=preferences.edit();
         String weatherstring = preferences.getString("weather",null);
-//        if(weatherstring!=null){
-//            Weather weather = Utility.handleWeatherResponse(weatherstring);
-//            weatherid = weather.basic.weatherId;
-//            showWeatherInfo(weather);
-//        }else{
+        String bingpic=preferences.getString("bing_pic",null);
+        if(bingpic!=null){
+            Glide.with(WeatherActivity.this).load(bingpic).into(bing_pic_img);
+        }else{
+            loadBingPic();
+        }
+        if(weatherstring!=null){
+            String nowdata= getIntent().getStringExtra("weather_id");
+            Weather weather =Utility.handleWeatherResponse(weatherstring);
+            weatherid = weather.basic.weatherId;
+            if(weatherid.equals(nowdata)){
+                showWeatherInfo(weather);
+            }else{
+                requestWeather(nowdata);
+            }
+        }else{
             weatherid = getIntent().getStringExtra("weather_id");
             scroll_view.setVisibility(View.INVISIBLE);
             requestWeather(weatherid);
-//        }
+        }
+
     }
     public void requestWeather(final String weatherId){
         String weatherUrl = "http://guolin.tech/api/weather?cityid="
@@ -89,6 +105,32 @@ public class WeatherActivity extends AppCompatActivity {
                         Toast.makeText(WeatherActivity.this,"获取数据失败",Toast.LENGTH_SHORT);
                     }
                 });
+            }
+
+
+        });
+    }
+    private void loadBingPic(){
+        String bingpicUrl="http://guolin.tech/api/bing_pic";
+        HttpUtils.sendOkhttpRequest(bingpicUrl, new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String data = response.body().string();
+                if(data!=null){
+                    editor.putString("bing_pic",data);
+                    editor.commit();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Glide.with(WeatherActivity.this).load(data).into(bing_pic_img);
+                        }
+                    });
+
+                }
+            }
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
 
 
@@ -142,5 +184,12 @@ public class WeatherActivity extends AppCompatActivity {
         sport_tv = (TextView) findViewById(R.id.sport_tv);
         scroll_view = (ScrollView) findViewById(R.id.scroll_view);
         drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        back = (Button)findViewById(R.id.weather_back_bt);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer_layout.openDrawer(Gravity.START);
+            }
+        });
     }
 }

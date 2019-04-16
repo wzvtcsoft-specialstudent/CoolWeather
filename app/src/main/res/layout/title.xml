@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize">
         <Button
+            android:id="@+id/weather_back_bt"
             android:layout_width="30sp"
             android:layout_height="30sp"
             android:layout_centerVertical="true"
