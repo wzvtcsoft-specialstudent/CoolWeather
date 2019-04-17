@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.machenike.coolweather.gson.Forecast;
 import com.example.machenike.coolweather.gson.Weather;
+import com.example.machenike.coolweather.service.AutoUpdateService;
 import com.example.machenike.coolweather.util.HttpUtils;
 import com.example.machenike.coolweather.util.Utility;
 
@@ -182,6 +183,8 @@ public class WeatherActivity extends AppCompatActivity {
             sport_tv.setText("运动建议:"+weather.suggestion.sport.info);
         }
         scroll_view.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
     private void setTitle(){
         if(Build.VERSION.SDK_INT>=21){
