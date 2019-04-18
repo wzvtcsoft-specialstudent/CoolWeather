@@ -91,7 +91,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
     public void requestWeather(final String weatherId){
-        String weatherUrl = "http://guolin.tech/api/weather?cityid="
+        String weatherUrl = "https://free-api.heweather.net/s6/weather?location="
                 +weatherId+"&key=1c5a7044e65241f1b624bf6880435606";
         HttpUtils.sendOkhttpRequest(weatherUrl, new Callback() {
             @Override
@@ -152,7 +152,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
     private void showWeatherInfo(Weather weather){
         String cityName = weather.basic.cityName;
-        String updateTime = weather.basic.update.updateTime.split(" ")[1];
+        String updateTime = weather.update.updateTime.split(" ")[1];
         String nowTemp=weather.now.temperature +"℃";
         String weatherInfo = weather.now.info;
         title_city_tv.setText(cityName);
@@ -168,19 +168,21 @@ public class WeatherActivity extends AppCompatActivity {
             TextView mintv=(TextView)view.findViewById(R.id.forcast_item_min_tv);
 
             datetv.setText(forecast.date);
-            infotv.setText(forecast.more.info);
-            maxtv.setText(forecast.temperature.max);
-            mintv.setText(forecast.temperature.min);
+            infotv.setText(forecast.info);
+            maxtv.setText(forecast.max);
+            mintv.setText(forecast.max);
             forecast_list_layout.addView(view);
         }
-        if(weather.aqi!=null){
-            aqi_tv.setText(weather.aqi.city.aqi);
-            pm25_tv.setText(weather.aqi.city.pm25);
-        }
-        if(weather.suggestion!=null){
-            comfort_tv.setText("舒适度:"+weather.suggestion.comfortable.info);
-            car_tv.setText("洗车指数:"+weather.suggestion.car.info);
-            sport_tv.setText("运动建议:"+weather.suggestion.sport.info);
+//        if(weather.lifestyleList!=null){
+//            aqi_tv.setText(weather.lifestyleList);
+//            pm25_tv.setText(weather.aqi.city.pm25);
+//        }
+        if(weather.lifestyleList!=null){
+            comfort_tv.setText("舒适度:"+weather.lifestyleList.get(0).info);
+            car_tv.setText("洗车指数:"+weather.lifestyleList.get(6).info);
+            sport_tv.setText("运动建议:"+weather.lifestyleList.get(3).info);
+            pm25_tv.setText(weather.lifestyleList.get(7).level);
+            aqi_tv.setText(weather.lifestyleList.get(7).level);
         }
         scroll_view.setVisibility(View.VISIBLE);
         Intent intent = new Intent(this, AutoUpdateService.class);
