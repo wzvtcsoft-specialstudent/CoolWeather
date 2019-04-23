@@ -1,14 +1,19 @@
 package com.example.machenike.coolweather;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +32,7 @@ import com.example.machenike.coolweather.util.HttpUtils;
 import com.example.machenike.coolweather.util.Utility;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -166,11 +172,15 @@ public class WeatherActivity extends AppCompatActivity {
             TextView infotv=(TextView) view.findViewById(R.id.forcast_item_weather_tv);
             TextView maxtv=(TextView)view.findViewById(R.id.forcast_item_max_tv);
             TextView mintv=(TextView)view.findViewById(R.id.forcast_item_min_tv);
+            ImageView imageView=(ImageView)view.findViewById(R.id.forcast_weather_img);
 
             datetv.setText(forecast.date);
             infotv.setText(forecast.info);
             maxtv.setText(forecast.max);
             mintv.setText(forecast.max);
+            Glide.with(WeatherActivity.this)
+                    .load("https://cdn.heweather.com/cond_icon/"+forecast.coded+".png")
+                    .into(imageView);
             forecast_list_layout.addView(view);
         }
 //        if(weather.lifestyleList!=null){
