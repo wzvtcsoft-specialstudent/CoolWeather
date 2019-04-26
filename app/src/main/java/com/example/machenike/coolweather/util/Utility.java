@@ -2,6 +2,7 @@ package com.example.machenike.coolweather.util;
 
 import com.example.machenike.coolweather.db.City;
 import com.example.machenike.coolweather.db.County;
+import com.example.machenike.coolweather.db.History;
 import com.example.machenike.coolweather.db.Province;
 import com.example.machenike.coolweather.gson.Weather;
 import com.google.gson.Gson;
@@ -75,5 +76,31 @@ public class Utility {
             e.printStackTrace();
         }
         return  null;
+    }
+    public static boolean handleHistoryResponse(String response){
+        try {
+            JSONObject object  = new JSONObject(response);
+            JSONArray array = object.getJSONArray("result");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject object1 = array.getJSONObject(i);
+                History history = new History();
+                String year=object1.getString("year");
+                char first = year.charAt(0);
+
+                if(first=='-') {
+                    year="公元前 "+year.replace("-"," ");
+                }else{
+                    year="公元 "+year;
+                }
+                history.setYear(year);
+                history.setInfo(object1.getString("title"));
+                history.save();
+            }
+            return true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

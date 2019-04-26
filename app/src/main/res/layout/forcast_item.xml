@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/forcast_item_date_tv"
         android:layout_width="0dp"
-        android:layout_weight="1.5"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:textColor="#fff"
         android:textSize="18sp"/>
@@ -19,24 +19,24 @@
     <TextView
         android:id="@+id/forcast_item_weather_tv"
         android:layout_width="0dp"
-        android:layout_weight="0.5"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textColor="#fff"
-        android:gravity="left"
-        android:textSize="18sp"/>
+        android:gravity="center"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/forcast_item_max_tv"
         android:layout_width="0dp"
-        android:layout_weight="0.6"
+        android:layout_weight="0.3"
         android:layout_height="wrap_content"
-        android:gravity="right|center"
+        android:gravity="center"
         android:textColor="#fff"
         android:textSize="18sp"/>
     <TextView
         android:layout_width="0dp"
-        android:layout_weight="0.4"
+        android:layout_weight="0.1"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
@@ -47,8 +47,8 @@
         android:id="@+id/forcast_item_min_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.6"
+        android:layout_weight="0.3"
         android:textColor="#fff"
-        android:gravity="center|left"
+        android:gravity="center"
         android:textSize="18sp"/>
 </LinearLayout>

@@ -25,13 +25,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.machenike.coolweather.db.History;
 import com.example.machenike.coolweather.gson.Forecast;
 import com.example.machenike.coolweather.gson.Weather;
 import com.example.machenike.coolweather.service.AutoUpdateService;
 import com.example.machenike.coolweather.util.HttpUtils;
 import com.example.machenike.coolweather.util.Utility;
 
+import org.litepal.crud.DataSupport;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -57,6 +61,8 @@ public class WeatherActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private Button back;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private List<History> historyList;
+    private LinearLayout historylayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,10 +98,15 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+
                 requestWeather(weatherid);
+                DataSupport.deleteAll(History.class);
+                requestHistory();
             }
         });
+        showHistory();
     }
+
     public void requestWeather(final String weatherId){
         String weatherUrl = "https://free-api.heweather.net/s6/weather?location="
                 +weatherId+"&key=1c5a7044e65241f1b624bf6880435606";
@@ -129,6 +140,48 @@ public class WeatherActivity extends AppCompatActivity {
 
 
         });
+    }
+    public void requestHistory(){
+        String address="http://www.ipip5.com/today/api.php?type=json";
+        HttpUtils.sendOkhttpRequest(address, new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String data = response.body().string();
+                Log.d("-------",data);
+                if(Utility.handleHistoryResponse(data)){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showHistory();
+                        }
+                    });
+                };
+            }
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                Log.d("History Eorror!","网络请求失败");
+            }
+
+
+        });
+    }
+    private void showHistory(){
+        historylayout.removeAllViews();
+        historyList= DataSupport.findAll(History.class);
+        if(historyList.size()>0){
+            for(History history:historyList){
+                    View view=LayoutInflater.from(this)
+                            .inflate(R.layout.history_item,historylayout,false);
+                    TextView year = (TextView)view.findViewById(R.id.year_history_item_tv);
+                    TextView info = (TextView)view.findViewById(R.id.how_history_item_tv);
+                    year.setText(history.getYear());
+                    info.setText(history.getInfo());
+                    historylayout.addView(view);
+                }
+        }else{
+            requestHistory();
+        }
     }
     private void loadBingPic(){
         String bingpicUrl="http://guolin.tech/api/bing_pic";
@@ -177,7 +230,7 @@ public class WeatherActivity extends AppCompatActivity {
             datetv.setText(forecast.date);
             infotv.setText(forecast.info);
             maxtv.setText(forecast.max);
-            mintv.setText(forecast.max);
+            mintv.setText(forecast.min);
             Glide.with(WeatherActivity.this)
                     .load("https://cdn.heweather.com/cond_icon/"+forecast.coded+".png")
                     .into(imageView);
@@ -231,5 +284,7 @@ public class WeatherActivity extends AppCompatActivity {
                 drawer_layout.openDrawer(Gravity.START);
             }
         });
+        historyList=new ArrayList<>();
+        historylayout = findViewById(R.id.history_list_layout);
     }
 }
