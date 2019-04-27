@@ -98,7 +98,6 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
                 requestWeather(weatherid);
                 DataSupport.deleteAll(History.class);
                 requestHistory();

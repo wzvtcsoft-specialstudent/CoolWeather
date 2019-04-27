@@ -64,6 +64,8 @@ public class ChooseAreaFragment extends Fragment{
 
     private ArrayAdapter<String> adapter;
     private ProgressDialog progressDialog;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.choose_area_layout, container, false);
@@ -89,18 +91,31 @@ public class ChooseAreaFragment extends Fragment{
                             queryCounty();
                         }else if(currentLevel==COUNTY_LEVEL){
 
-                            Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                            SharedPreferences.Editor editor=sharedPreferences.edit();
-                            editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
-                            editor.commit();
-                            intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
-                            startActivity(intent);
-                            getActivity().finish();
-                            if(getActivity() instanceof WeatherActivity){
-                                WeatherActivity weatherActivity=(WeatherActivity)getActivity();
-                                weatherActivity.drawer_layout.closeDrawer(Gravity.START);
-                            }
+                                if(getActivity() instanceof  MainActivity){
+                                    Intent intent = new Intent(getActivity(),WeatherFragmentActivity.class);
+                                    editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
+                                    editor.commit();
+//                                    intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
+                                    startActivity(intent);
+                                    getActivity().finish();
+                                }else if(getActivity() instanceof  WeatherFragmentActivity){
+                                    WeatherFragmentActivity activity=(WeatherFragmentActivity)getActivity();
+                                    editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
+                                    editor.commit();
+                                    activity.addWeather();
+                                }
+//                            Intent intent = new Intent(getActivity(),WeatherFragmentActivity.class);
+//                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//                            SharedPreferences.Editor editor=sharedPreferences.edit();
+//                            editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
+//                            editor.commit();
+//                            intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
+//                            startActivity(intent);
+//                            getActivity().finish();
+//                            if(getActivity() instanceof WeatherActivity){
+//                                WeatherActivity weatherActivity=(WeatherActivity)getActivity();
+//                                weatherActivity.drawer_layout.closeDrawer(Gravity.START);
+//                            }
 
                         }
             }
@@ -237,6 +252,8 @@ public class ChooseAreaFragment extends Fragment{
         cityList = new ArrayList<>();
         countyList = new ArrayList<>();
         dataList = new ArrayList<>();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        editor=sharedPreferences.edit();
     }
 
 
