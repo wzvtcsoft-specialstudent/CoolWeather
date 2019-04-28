@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.machenike.coolweather.db.AreaSave;
 import com.example.machenike.coolweather.db.City;
 import com.example.machenike.coolweather.db.County;
 import com.example.machenike.coolweather.db.Province;
@@ -35,6 +36,8 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static android.content.Context.MODE_MULTI_PROCESS;
 
 public class ChooseAreaFragment extends Fragment{
     private View view;
@@ -64,8 +67,10 @@ public class ChooseAreaFragment extends Fragment{
 
     private ArrayAdapter<String> adapter;
     private ProgressDialog progressDialog;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+
+    private List<AreaSave>  areaSaveList;
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.choose_area_layout, container, false);
@@ -78,32 +83,35 @@ public class ChooseAreaFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        initClick();
+        queryProvince();
+    }
+    private void initClick(){
         area_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
 
-                        if(currentLevel==PROVINCE_LEVEL){
-                            selectProvince = provinceList.get(i);
-                            queryCity();
-                        }else if(currentLevel==CITY_LEVEL){
-                            selectCity =cityList.get(i);
-                            queryCounty();
-                        }else if(currentLevel==COUNTY_LEVEL){
+                if(currentLevel==PROVINCE_LEVEL){
+                    selectProvince = provinceList.get(i);
+                    queryCity();
+                }else if(currentLevel==CITY_LEVEL){
+                    selectCity =cityList.get(i);
+                    queryCounty();
+                }else if(currentLevel==COUNTY_LEVEL){
 
-                                if(getActivity() instanceof  MainActivity){
-                                    Intent intent = new Intent(getActivity(),WeatherFragmentActivity.class);
-                                    editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
-                                    editor.commit();
-//                                    intent.putExtra("weather_id",countyList.get(i).getWeatherId()+"");
-                                    startActivity(intent);
-                                    getActivity().finish();
-                                }else if(getActivity() instanceof  WeatherFragmentActivity){
-                                    WeatherFragmentActivity activity=(WeatherFragmentActivity)getActivity();
-                                    editor.putString("weather_id",countyList.get(i).getWeatherId()+"");
-                                    editor.commit();
-                                    activity.addWeather();
-                                }
+                    if(getActivity() instanceof  MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherFragmentActivity.class);
+//                        editor.putString("weather_id",countyList.get(i).getWeatherId());
+//                        editor.commit();
+                        intent.putExtra("weather_id",countyList.get(i).getWeatherId());
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if(getActivity() instanceof  WeatherFragmentActivity){
+                        WeatherFragmentActivity activity=(WeatherFragmentActivity)getActivity();
+//                        editor.putString("",countyList.get(i).getWeatherId());
+//                        editor.commit();
+                        activity.addWeather(countyList.get(i).getWeatherId());
+                    }
 //                            Intent intent = new Intent(getActivity(),WeatherFragmentActivity.class);
 //                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 //                            SharedPreferences.Editor editor=sharedPreferences.edit();
@@ -117,7 +125,7 @@ public class ChooseAreaFragment extends Fragment{
 //                                weatherActivity.drawer_layout.closeDrawer(Gravity.START);
 //                            }
 
-                        }
+                }
             }
         });
         back_bt.setOnClickListener(new View.OnClickListener() {
@@ -129,7 +137,6 @@ public class ChooseAreaFragment extends Fragment{
                     queryCity();
             }
         });
-        queryProvince();
     }
     private void queryProvince(){
         choose_area_tv.setText("中国");
@@ -252,8 +259,9 @@ public class ChooseAreaFragment extends Fragment{
         cityList = new ArrayList<>();
         countyList = new ArrayList<>();
         dataList = new ArrayList<>();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        editor=sharedPreferences.edit();
+        preferences= getActivity().getSharedPreferences("AreaSave",MODE_MULTI_PROCESS);
+        editor=preferences.edit();
+        areaSaveList = new ArrayList<>();
     }
 
 

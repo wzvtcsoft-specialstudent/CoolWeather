@@ -1,5 +1,6 @@
 package com.example.machenike.coolweather.util;
 
+import com.example.machenike.coolweather.db.AreaSave;
 import com.example.machenike.coolweather.db.City;
 import com.example.machenike.coolweather.db.County;
 import com.example.machenike.coolweather.db.History;
@@ -63,6 +64,13 @@ public class Utility {
 
         return false;
     }
+    public static void saveArea(String weatherID,String cityName,String weatherData){
+        AreaSave areaSave=new AreaSave();
+        areaSave.setWeatherID(weatherID);
+        areaSave.setCityName(cityName);
+        areaSave.setWeatherData(weatherData);
+        areaSave.save();
+    }
     /**
      * 将返回的数据解析成Weather实体类
      */
@@ -103,4 +111,5 @@ public class Utility {
 
         return false;
     }
+
 }

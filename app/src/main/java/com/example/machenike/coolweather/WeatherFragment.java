@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.machenike.coolweather.db.AreaSave;
 import com.example.machenike.coolweather.db.History;
 import com.example.machenike.coolweather.gson.Forecast;
 import com.example.machenike.coolweather.gson.Weather;
@@ -38,6 +40,8 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static android.content.Context.MODE_MULTI_PROCESS;
 
 public class WeatherFragment extends Fragment{
     private View view;
@@ -60,6 +64,7 @@ public class WeatherFragment extends Fragment{
     private SharedPreferences.Editor editor;
     private String weatherID;
     private List<History> historyList;
+    private Weather weather;
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_weather, container, false);
@@ -77,7 +82,6 @@ public class WeatherFragment extends Fragment{
         initSwipeRefresh();
         setHomeButtom();
     }
-
     public void initSwipeRefresh(){
         swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -144,47 +148,60 @@ public class WeatherFragment extends Fragment{
     }
 
     private void initWeatherInfo(){
-        weatherID=preferences.getString("weather_id",null);
+//        Intent intent=getActivity().getIntent();
+//        weatherID=intent.getBooleanExtra("")
+//        weatherID=preferences.getString("weather_id",null);
+        Bundle bundle= this.getArguments();
+        weatherID=bundle.getString("weather_id");
         scroll_view.setVisibility(View.INVISIBLE);
         swipe_refresh.setRefreshing(true);
         if(weatherID!=null)
         requestWeather(weatherID);
     }
     private void requestWeather(final String weatherId){
-        String weatherUrl = "https://free-api.heweather.net/s6/weather?location="
-                +weatherId+"&key=1c5a7044e65241f1b624bf6880435606";
-        HttpUtils.sendOkhttpRequest(weatherUrl, new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String data = response.body().string();
-                Log.d("-----","Weather"+data);
-                final Weather weather = Utility.handleWeatherResponse(data);
-                if(weather!=null&&"ok".equals(weather.status)){
-                    editor.putString("weather",data);
-                    editor.apply();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showWeatherInfo(weather);
-                            swipe_refresh.setRefreshing(false);
-                        }
-                    });
-                }
 
-            }
+        new Thread(new Runnable() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                String weatherUrl = "https://free-api.heweather.net/s6/weather?location="
+                        +weatherId+"&key=1c5a7044e65241f1b624bf6880435606";
+                HttpUtils.sendOkhttpRequest(weatherUrl, new Callback() {
                     @Override
-                    public void run() {
-                        swipe_refresh.setRefreshing(false);
-                        Toast.makeText(getActivity(),"获取数据失败",Toast.LENGTH_SHORT);
+                    public void onResponse(Call call, Response response) throws IOException {
+                        final String data = response.body().string();
+                        Log.d("-----","Weather"+data);
+                        weather = Utility.handleWeatherResponse(data);
+                        List<AreaSave> areaSaveList = DataSupport.where
+                                ("cityName = ?",weather.basic.cityName).find(AreaSave.class);
+                        if(areaSaveList.size()==0)
+                        Utility.saveArea(weatherID,weather.basic.cityName,data);
+                        if(weather!=null&&"ok".equals(weather.status)){
+                            editor.putString("weather",data);
+                            editor.apply();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showWeatherInfo(weather);
+                                    swipe_refresh.setRefreshing(false);
+                                }
+                            });
+                        }
+
+                    }
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                swipe_refresh.setRefreshing(false);
+                                Toast.makeText(getActivity(),"获取数据失败",Toast.LENGTH_SHORT);
+                            }
+                        });
                     }
                 });
             }
+        }).start();
 
-
-        });
     }
     private void showWeatherInfo(Weather weather){
         String cityName = weather.basic.cityName;
@@ -196,6 +213,7 @@ public class WeatherFragment extends Fragment{
         now_tmp_tv.setText(nowTemp);
         now_weather_info_tv.setText(weatherInfo);
         forecast_list_layout.removeAllViews();
+
         for(Forecast forecast :weather.forecastList){
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.forcast_item,forecast_list_layout,false);
             TextView datetv=(TextView) view.findViewById(R.id.forcast_item_date_tv);
@@ -225,8 +243,8 @@ public class WeatherFragment extends Fragment{
             aqi_tv.setText(weather.lifestyleList.get(7).level);
         }
         scroll_view.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(getActivity(), AutoUpdateService.class);
-        getActivity().startService(intent);
+//        Intent intent = new Intent(getActivity(), AutoUpdateService.class);
+//        getActivity().startService(intent);
     }
 
     private void initBingPic(){
@@ -242,6 +260,7 @@ public class WeatherFragment extends Fragment{
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     final String data = response.body().string();
+                    Log.d("-----","BingPic"+data);
                     if(data!=null){
                         editor.putString("bing_pic",data);
                         editor.commit();
@@ -289,7 +308,7 @@ public class WeatherFragment extends Fragment{
         history_list_layout = (LinearLayout) view.findViewById(R.id.history_list_layout);
         scroll_view = (ScrollView) view.findViewById(R.id.scroll_view);
         swipe_refresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
-        preferences= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        preferences=getActivity().getSharedPreferences("AreaSave",MODE_MULTI_PROCESS);;
         editor=preferences.edit();
         historyList=new ArrayList<>();
     }
