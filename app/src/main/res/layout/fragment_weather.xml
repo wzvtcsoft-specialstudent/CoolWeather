@@ -17,11 +17,14 @@
             android:layout_height="match_parent"
             android:scrollbars="none"
             android:overScrollMode="never">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:fitsSystemWindows="true">
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="20sp" />
                 <include layout="@layout/title"/>
                 <include layout="@layout/now"/>
                 <include layout="@layout/forecast"/>

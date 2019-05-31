@@ -69,10 +69,7 @@ public class WeatherFragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_weather, container, false);
         initView(view);
-        initBingPic();
-        setTitle();
-        initWeatherInfo();
-        showHistory();
+
         return view;
     }
 
@@ -81,6 +78,10 @@ public class WeatherFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
         initSwipeRefresh();
         setHomeButtom();
+        initBingPic();
+        setTitle();
+        initWeatherInfo();
+        showHistory();
     }
     public void initSwipeRefresh(){
         swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -150,6 +151,7 @@ public class WeatherFragment extends Fragment{
     private void initWeatherInfo(){
 //        Intent intent=getActivity().getIntent();
 //        weatherID=intent.getBooleanExtra("")
+
 //        weatherID=preferences.getString("weather_id",null);
         Bundle bundle= this.getArguments();
         weatherID=bundle.getString("weather_id");
@@ -215,6 +217,7 @@ public class WeatherFragment extends Fragment{
         forecast_list_layout.removeAllViews();
 
         for(Forecast forecast :weather.forecastList){
+//            View view=View.inflate(getActivity(),R.layout.forcast_item,null);
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.forcast_item,forecast_list_layout,false);
             TextView datetv=(TextView) view.findViewById(R.id.forcast_item_date_tv);
             TextView infotv=(TextView) view.findViewById(R.id.forcast_item_weather_tv);
@@ -243,8 +246,8 @@ public class WeatherFragment extends Fragment{
             aqi_tv.setText(weather.lifestyleList.get(7).level);
         }
         scroll_view.setVisibility(View.VISIBLE);
-//        Intent intent = new Intent(getActivity(), AutoUpdateService.class);
-//        getActivity().startService(intent);
+        Intent intent = new Intent(getActivity(), AutoUpdateService.class);
+        getActivity().startService(intent);
     }
 
     private void initBingPic(){
